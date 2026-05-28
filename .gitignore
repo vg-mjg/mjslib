@@ -1,0 +1,7 @@
+bin/
+obj/
+
+result
+result-*
+
+Directory.Build.props
