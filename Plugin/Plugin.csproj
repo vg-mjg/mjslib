@@ -1,0 +1,103 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>Mjslib</AssemblyName>
+    <RootNamespace>Mjslib</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+
+    <BepInExCore>$(BepInExRoot)/core</BepInExCore>
+    <BepInExInterop>$(BepInExRoot)/interop</BepInExInterop>
+  </PropertyGroup>
+
+  <Target Name="ValidateBepInExReferences" BeforeTargets="ResolveReferences">
+    <Error
+      Condition="'$(BepInExRoot)' == ''"
+      Text="Set BepInExRoot to your local BepInEx folder. Example: dotnet build Plugin/Plugin.csproj -c Release -p:BepInExRoot=/path/to/BepInEx, or copy Directory.Build.props.example to Directory.Build.props." />
+    <Error
+      Condition="'$(BepInExRoot)' != '' and !Exists('$(BepInExCore)/BepInEx.Core.dll')"
+      Text="BepInExRoot '$(BepInExRoot)' does not contain core/BepInEx.Core.dll." />
+    <Error
+      Condition="'$(BepInExRoot)' != '' and !Exists('$(BepInExInterop)/Assembly-CSharp.dll')"
+      Text="BepInExRoot '$(BepInExRoot)' does not contain interop/Assembly-CSharp.dll." />
+  </Target>
+
+  <ItemGroup>
+    <EmbeddedResource Include="../lua/bootstrap.lua">
+      <LogicalName>bootstrap.lua</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Tomlyn" Version="0.17.0" GeneratePathProperty="true" ExcludeAssets="runtime" />
+    <EmbeddedResource Include="$(PkgTomlyn)/lib/netstandard2.0/Tomlyn.dll">
+      <LogicalName>Tomlyn.dll</LogicalName>
+    </EmbeddedResource>
+    <PackageReference Include="NVorbis" Version="0.10.5" GeneratePathProperty="true" ExcludeAssets="runtime" />
+    <EmbeddedResource Include="$(PkgNVorbis)/lib/netstandard2.0/NVorbis.dll">
+      <LogicalName>NVorbis.dll</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx.Core">
+      <HintPath>$(BepInExCore)/BepInEx.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP">
+      <HintPath>$(BepInExCore)/BepInEx.Unity.IL2CPP.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExCore)/0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>$(BepInExCore)/Il2CppInterop.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppInterop.Common">
+      <HintPath>$(BepInExCore)/Il2CppInterop.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(BepInExInterop)/Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>$(BepInExInterop)/Il2Cppmscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppSystem">
+      <HintPath>$(BepInExInterop)/Il2CppSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(BepInExInterop)/UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(BepInExInterop)/UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(BepInExInterop)/UnityEngine.AudioModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>$(BepInExInterop)/UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
+      <HintPath>$(BepInExInterop)/UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+  </ItemGroup>
+
+</Project>
