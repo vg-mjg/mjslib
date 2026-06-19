@@ -1,0 +1,35 @@
+# example asset replacement pack
+#
+# place this folder anywhere under BepInEx/plugins
+# mjslib scans plugins/**/assets.toml and resolves files relative to this file
+
+[[replace]]
+# replace ichihime character art
+game_path = "deco/character/yiji/full/full"
+file = "textures/yiji-full.png"
+# srgb = true
+# set srgb to false for linear textures such as normal maps
+
+# replace the ui click sound with a short ogg blip
+# game_path is the raw loader path with no suffix
+[[replace]]
+game_path = "audio/audio_common/mouseclick"
+file = "audio/coin.ogg"
+
+# replace one emote by exact emote path including its ID in the atlas
+[[replace]]
+game_path = "deco/emo/e200001/common/0"
+file = "emotes/ichihime-0.png"
+# pivot = [0.5, 0.5]
+# ppu = 100
+# pivot and ppu only apply to sprite replacements
+# raise ppu with larger pngs to preserve SetNativeSize footprint
+
+# text and byte replacements use the same path mapping
+# loader type decides whether the file is served as text or raw bytes
+# use discovery mode to find the exact requested path for a text or byte asset
+# add another replace table with these keys
+#
+# [[replace]]
+# game_path = "data/some/config_table"
+# file = "data/config_table.json"
