@@ -3,5 +3,6 @@ obj/
 
 result
 result-*
+.direnv
 
 Directory.Build.props

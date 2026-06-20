@@ -9,12 +9,12 @@
 -- malformed entries are logged and skipped while valid entries still register
 
 local cfg = MjsLua.config("ConfigDemo", {
-	Enabled = { default = true, desc = "Master toggle for the demo" },
-	Volume = { default = 0.5, min = 0, max = 1, desc = "A 0..1 volume slider" },
-	MaxItems = { default = 3, type = "int", min = 1, max = 99, desc = "An integer count" },
-	Greeting = { default = "hello", desc = "Free text" },
-	Mode = { default = "fast", choices = { "fast", "slow" }, desc = "A mode choice" },
-	Hotkey = { default = "LeftControl+G", keybind = true, desc = "A demo hotkey" },
+	Enabled = { default = true, desc = "toggle for the demo" },
+    Volume = { default = 0.5, min = 0, max = 1, desc = "0..1 volume slider" },
+    MaxItems = { default = 3, type = "int", min = 1, max = 99, desc = "integer count" },
+    Greeting = { default = "hello", desc = "Free text" },
+    Mode = { default = "fast", choices = { "fast", "slow" }, desc = "mode choice" },
+    Hotkey = { default = "LeftControl+G", keybind = true, desc = "demo hotkey" },
 })
 
 local function logf(fmt, ...)
