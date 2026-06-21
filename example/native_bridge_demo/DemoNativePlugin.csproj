@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../../Plugin/Plugin.csproj">
+    <ProjectReference Include="../../mjslib.csproj">
       <Private>false</Private>
     </ProjectReference>
   </ItemGroup>

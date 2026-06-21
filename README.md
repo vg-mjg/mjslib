@@ -12,7 +12,7 @@ It adds:
 
 1. Download `BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.*.zip` from [here](https://builds.bepinex.dev/projects/bepinex_be)
 2. Unzip it into the Mahjong Soul directory
-3. Download [`Mjslib.dll`](https://github.com/vg-mjg/mjslib/releases)
+3. Download [`mjslib.dll`](https://github.com/vg-mjg/mjslib/releases)
 4. Copy it to `<GameDir>/BepInEx/plugins`
 5. Copy some mods into `<GameDir>/BepInEx/plugins`
 6. Run the game
@@ -28,7 +28,7 @@ If you are using wine/proton, you'll need to bully it into loading this dll with
 Run the game to ensure BepInEx is being loaded. It should emit a log to `BepInEx/LogOutput.log`.
 First run will take a while, so be patient.
 
-Download [`Mjslib.dll` from releases](https://github.com/vg-mjg/mjslib/releases) and copy it to `<GameDir>/BepInEx/plugins`.
+Download [`mjslib.dll` from releases](https://github.com/vg-mjg/mjslib/releases) and copy it to `<GameDir>/BepInEx/plugins`.
 Now when you launch the game, `BepInEx/LogOutput.log` should contain: `[Info: mjslib] mjslib 0.1.0 loading`.
 
 ## Build
@@ -38,7 +38,7 @@ If you are interested in developing mjslib or would simply prefer to build it fr
 Use the dotnet toolchain (>=net6.0) to build it.
 
 ```sh
-dotnet build Plugin/Plugin.csproj -c Release -p:BepInExRoot=/path/to/BepInEx
+dotnet build -c Release -p:BepInExRoot=/path/to/BepInEx
 ```
 
 For a local `BepInExRoot` default, copy `Directory.Build.props.example` to `Directory.Build.props` and edit the `BepInExRoot` path inside.

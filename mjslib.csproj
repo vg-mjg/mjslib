@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>Mjslib</AssemblyName>
+    <AssemblyName>mjslib</AssemblyName>
     <RootNamespace>Mjslib</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 
     <BepInExCore>$(BepInExRoot)/core</BepInExCore>
     <BepInExInterop>$(BepInExRoot)/interop</BepInExInterop>
@@ -17,7 +18,7 @@
   <Target Name="ValidateBepInExReferences" BeforeTargets="ResolveReferences">
     <Error
       Condition="'$(BepInExRoot)' == ''"
-      Text="Set BepInExRoot to your local BepInEx folder. Example: dotnet build Plugin/Plugin.csproj -c Release -p:BepInExRoot=/path/to/BepInEx, or copy Directory.Build.props.example to Directory.Build.props." />
+      Text="Set BepInExRoot to your local BepInEx folder. Example: dotnet build mjslib.csproj -c Release -p:BepInExRoot=/path/to/BepInEx, or copy Directory.Build.props.example to Directory.Build.props." />
     <Error
       Condition="'$(BepInExRoot)' != '' and !Exists('$(BepInExCore)/BepInEx.Core.dll')"
       Text="BepInExRoot '$(BepInExRoot)' does not contain core/BepInEx.Core.dll." />
@@ -27,7 +28,11 @@
   </Target>
 
   <ItemGroup>
-    <EmbeddedResource Include="../lua/bootstrap.lua">
+    <Compile Include="src/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="lua/bootstrap.lua">
       <LogicalName>bootstrap.lua</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
