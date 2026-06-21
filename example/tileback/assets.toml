@@ -1,0 +1,11 @@
+[[replace]]
+game_path = "deco/mjpai/mjp_default/3d/texture/hand"
+file = "hand.png"
+
+[[replace]]
+game_path = "deco/mjpai/mjp_default/3d/texture/mjp"
+file = "mjp.png"
+
+[[replace]]
+game_path = "deco/mjpai/mjp_default/pic/common/mjp_default"
+file = "preview.png"
