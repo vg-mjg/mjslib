@@ -106,7 +106,7 @@ The simplest way is to enable `Discovery` in `<GameDir>/BepInEx/config/vg.mjg.mj
 Enabled = true
 ```
 
-After launching the game, it will now log loaded asset paths to `<GameDir>/BepInEx/config/Mjslib.discovery.log`.
+After launching the game, it will now log loaded asset paths to `<GameDir>/BepInEx/mjslib.discovery.log`.
 Use these paths directly as the `game_path` in `assets.toml`.
 
 Note that textures and sprites also report the dimensions.

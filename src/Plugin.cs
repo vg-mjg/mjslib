@@ -44,9 +44,9 @@ namespace Mjslib
 
             var discoveryEnabled = global::Mjslib.Config.Bind(
                 Config, "Discovery", "Enabled", false,
-                "Log every requested asset path to discovery.log (in the BepInEx config folder) so you "
-                + "can find the game_path values to map. Default off.").Value;
-            var discoveryPath = Path.Combine(Paths.ConfigPath, "Mjslib.discovery.log");
+                "Log every requested asset path to mjslib.discovery.log (in the BepInEx folder, next to "
+                + "LogOutput.log) so you can find the game_path values to map. Default off.").Value;
+            var discoveryPath = Path.Combine(Paths.BepInExRootPath, "mjslib.discovery.log");
             AssetReplace.Discovery = new DiscoveryLog(discoveryEnabled, discoveryPath, Log);
             if (discoveryEnabled) Log.LogInfo($"Discovery mode ON, logging requested paths to {discoveryPath}");
 
