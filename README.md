@@ -63,6 +63,10 @@ game_path = "deco/character/yiji/full/full"
 file = "ichihime-full.png"
 # set srgb to false for linear textures such as normal maps
 srgb = true # true by default anyway
+# texture wrap mode: repeat (default), clamp, mirror, or mirror_once
+# try to match the source texture
+# tile atlases (like tile backs) need repeat, whereas single-frame textures are usually clamp
+wrap = "repeat"
 
 # audio replacement
 [[replace]]

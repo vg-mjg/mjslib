@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using Mjslib.AssetSwap;
+using UnityEngine;
 
 namespace Mjslib
 {
@@ -12,6 +13,8 @@ namespace Mjslib
         public float? Ppu { get; set; }
 
         public bool? Srgb { get; set; }
+
+        public TextureWrapMode? Wrap { get; set; }
     }
 
     public static class Assets
@@ -60,7 +63,7 @@ namespace Mjslib
             }
 
             registry.AddReplacement(
-                gamePath, resolvedFile, opts?.Srgb, opts?.Pivot, opts?.Ppu, sourceLabel, log!);
+                gamePath, resolvedFile, opts?.Srgb, opts?.Pivot, opts?.Ppu, opts?.Wrap, sourceLabel, log!);
             log?.LogInfo($"Registered code asset replacement: '{gamePath}' -> '{resolvedFile}' ({sourceLabel})");
         }
     }

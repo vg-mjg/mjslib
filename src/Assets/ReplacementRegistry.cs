@@ -4,6 +4,7 @@ using System.IO;
 using BepInEx.Logging;
 using Tomlyn;
 using Tomlyn.Model;
+using UnityEngine;
 
 namespace Mjslib.AssetSwap
 {
@@ -11,7 +12,7 @@ namespace Mjslib.AssetSwap
     {
         public ReplacementEntry(
             string gamePathRaw, string filePath, bool srgb, string sourcePack,
-            float pivotX, float pivotY, float ppu)
+            float pivotX, float pivotY, float ppu, TextureWrapMode wrap)
         {
             GamePathRaw = gamePathRaw;
             FilePath = filePath;
@@ -20,6 +21,7 @@ namespace Mjslib.AssetSwap
             PivotX = pivotX;
             PivotY = pivotY;
             Ppu = ppu;
+            Wrap = wrap;
         }
 
         public string GamePathRaw { get; }
@@ -30,6 +32,7 @@ namespace Mjslib.AssetSwap
         public float PivotX { get; }
         public float PivotY { get; }
         public float Ppu { get; }
+        public TextureWrapMode Wrap { get; }
     }
 
     internal sealed class ReplacementRegistry
@@ -44,14 +47,14 @@ namespace Mjslib.AssetSwap
 
         public void AddReplacement(
             string gamePath, string resolvedFile, bool? srgb,
-            (float x, float y)? pivot, float? ppu, string sourceLabel, ManualLogSource log)
+            (float x, float y)? pivot, float? ppu, TextureWrapMode? wrap, string sourceLabel, ManualLogSource log)
         {
             var (pivotX, pivotY) = pivot ?? (DefaultPivot, DefaultPivot);
             var resolvedPpu = ppu is { } p && p > 0f ? p : DefaultPpu;
 
             var normalized = PathNormalizer.Normalize(gamePath);
             var entry = new ReplacementEntry(
-                gamePath, resolvedFile, srgb ?? true, sourceLabel, pivotX, pivotY, resolvedPpu);
+                gamePath, resolvedFile, srgb ?? true, sourceLabel, pivotX, pivotY, resolvedPpu, wrap ?? DefaultWrap);
 
             if (_byPath.TryGetValue(normalized, out var existing))
             {
@@ -135,6 +138,7 @@ namespace Mjslib.AssetSwap
             var srgb = GetBool(row, "srgb", defaultValue: true);
             var (pivotX, pivotY) = GetPivot(pack, row, log);
             var ppu = GetPpu(pack, row, log);
+            var wrap = GetWrap(pack, row, log);
 
             var resolvedFile = Path.GetFullPath(Path.Combine(pack.BaseDir, file!));
             if (!File.Exists(resolvedFile))
@@ -145,7 +149,7 @@ namespace Mjslib.AssetSwap
             }
 
             var normalized = PathNormalizer.Normalize(gamePath);
-            var entry = new ReplacementEntry(gamePath!, resolvedFile, srgb, pack.TomlPath, pivotX, pivotY, ppu);
+            var entry = new ReplacementEntry(gamePath!, resolvedFile, srgb, pack.TomlPath, pivotX, pivotY, ppu, wrap);
 
             if (_byPath.TryGetValue(normalized, out var existing))
             {
@@ -164,6 +168,7 @@ namespace Mjslib.AssetSwap
 
         private const float DefaultPivot = 0.5f;
         private const float DefaultPpu = 100f;
+        private const TextureWrapMode DefaultWrap = TextureWrapMode.Repeat;
 
         private static (float x, float y) GetPivot(DiscoveredPack pack, TomlTable row, ManualLogSource log)
         {
@@ -185,6 +190,25 @@ namespace Mjslib.AssetSwap
 
             log.LogWarning($"Ignoring invalid ppu for '{GetString(row, "game_path")}' in {pack.TomlPath} (expected a positive number); using default {DefaultPpu}");
             return DefaultPpu;
+        }
+
+        private static TextureWrapMode GetWrap(DiscoveredPack pack, TomlTable row, ManualLogSource log)
+        {
+            if (!row.TryGetValue("wrap", out var v)) return DefaultWrap;
+            if (v is string s)
+            {
+                switch (s.Trim().ToLowerInvariant())
+                {
+                    case "repeat": return TextureWrapMode.Repeat;
+                    case "clamp": return TextureWrapMode.Clamp;
+                    case "mirror": return TextureWrapMode.Mirror;
+                    case "mirror_once":
+                    case "mirroronce": return TextureWrapMode.MirrorOnce;
+                }
+            }
+
+            log.LogWarning($"Ignoring invalid wrap for '{GetString(row, "game_path")}' in {pack.TomlPath} (expected repeat, clamp, mirror, or mirror_once); using default {DefaultWrap}");
+            return DefaultWrap;
         }
 
         private static bool TryToFloat(object? v, out float result)

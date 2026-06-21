@@ -43,7 +43,7 @@ namespace Mjslib.AssetSwap
                 }
 
                 tex.filterMode = FilterMode.Bilinear;
-                tex.wrapMode = TextureWrapMode.Clamp;
+                tex.wrapMode = entry.Wrap;
                 // hide the texture from unity cleanup
                 tex.hideFlags = HideFlags.HideAndDontSave;
 
