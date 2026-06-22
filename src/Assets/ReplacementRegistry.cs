@@ -38,7 +38,7 @@ namespace Mjslib.AssetSwap
     internal sealed class ReplacementRegistry
     {
         private readonly Dictionary<string, ReplacementEntry> _byPath =
-            new Dictionary<string, ReplacementEntry>(StringComparer.Ordinal);
+            new Dictionary<string, ReplacementEntry>(StringComparer.OrdinalIgnoreCase);
 
         public int Count => _byPath.Count;
 

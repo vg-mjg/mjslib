@@ -86,6 +86,10 @@
       <HintPath>$(BepInExInterop)/UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>$(BepInExInterop)/UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
       <HintPath>$(BepInExInterop)/UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>false</Private>

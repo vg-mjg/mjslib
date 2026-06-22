@@ -5,14 +5,20 @@ namespace Mjslib.AssetSwap
     internal static class PathNormalizer
     {
         private static readonly string[] KnownExtensions = { ".png", ".jpg", ".jpeg" };
+        private const string BundleRootPrefix = "myassets/";
 
         public static string Normalize(string? raw)
         {
             if (string.IsNullOrEmpty(raw)) return string.Empty;
 
-            var s = raw!.Replace('\\', '/').Trim();
+            var s = raw!.Replace('\\', '/').Trim().ToLowerInvariant();
 
             if (s.StartsWith("./", StringComparison.Ordinal)) s = s.Substring(2);
+
+            // AssetBundle container keys are "myassets/<path>.<ext>"
+            // strip the root so they look like raw loader paths for consistency
+            if (s.StartsWith(BundleRootPrefix, StringComparison.Ordinal))
+                s = s.Substring(BundleRootPrefix.Length);
 
             foreach (var ext in KnownExtensions)
             {

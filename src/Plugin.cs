@@ -64,6 +64,7 @@ namespace Mjslib
             AssetReplace.Sprites = new SpriteFactory(AssetReplace.Textures, Log);
             AssetReplace.Audio = new AudioFactory(decoder, Log);
             AssetReplace.Texts = new TextAssetFactory(Log);
+            AssetReplace.Baked = new BakedTextureSwap(AssetReplace.Registry, AssetReplace.Textures, Log);
 
             harmony.PatchAll(typeof(LoadTexturePatch));
             harmony.PatchAll(typeof(LoadTextureAsyncPatch));
@@ -74,9 +75,11 @@ namespace Mjslib
             harmony.PatchAll(typeof(LoadTextAsyncPatch));
             harmony.PatchAll(typeof(LoadBytesPatch));
             harmony.PatchAll(typeof(LoadBytesAsyncPatch));
+            harmony.PatchAll(typeof(LoadPrefabPatch));
+            harmony.PatchAll(typeof(LoadPrefabAsyncPatch));
             Log.LogInfo(
                 "Patched ResLoadMgr.LoadTexture/LoadTextureAsync, LoadSprite/LoadSpriteAsync, "
-                + "LoadText/LoadTextAsync, LoadBytes/LoadBytesAsync, "
+                + "LoadText/LoadTextAsync, LoadBytes/LoadBytesAsync, LoadPrefab/LoadPrefabAsync, "
                 + $"and AudioLoaderManager.LoadClip (audio decoder: {decoder})");
         }
 

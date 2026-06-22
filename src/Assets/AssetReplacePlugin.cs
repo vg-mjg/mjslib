@@ -14,6 +14,7 @@ namespace Mjslib.AssetSwap
         internal static SpriteFactory? Sprites;
         internal static AudioFactory? Audio;
         internal static TextAssetFactory? Texts;
+        internal static BakedTextureSwap? Baked;
 
         internal static DiscoveryLog? Discovery;
 
@@ -125,6 +126,21 @@ namespace Mjslib.AssetSwap
                 {
                     discovery.RecordSprite("sprite", path, sprite);
                     original.Invoke(sprite);
+                }));
+        }
+
+        internal static Il2CppSystem.Action<UnityEngine.Transform>? WrapPrefabAsync(
+            Il2CppSystem.Action<UnityEngine.Transform>? onComplete)
+        {
+            var baked = Baked;
+            if (baked == null || !baked.Active) return onComplete;
+
+            var original = onComplete;
+            return DelegateSupport.ConvertDelegate<Il2CppSystem.Action<UnityEngine.Transform>>(
+                (Action<UnityEngine.Transform>)(root =>
+                {
+                    baked.OnPrefabLoaded(root);
+                    original?.Invoke(root);
                 }));
         }
     }
@@ -277,6 +293,24 @@ namespace Mjslib.AssetSwap
 
             onComplete?.Invoke((Il2CppStructArray<byte>)bytes);
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(ResLoadMgr), nameof(ResLoadMgr.LoadPrefab))]
+    internal static class LoadPrefabPatch
+    {
+        private static void Postfix(UnityEngine.Transform __result)
+        {
+            AssetReplace.Baked?.OnPrefabLoaded(__result);
+        }
+    }
+
+    [HarmonyPatch(typeof(ResLoadMgr), nameof(ResLoadMgr.LoadPrefabAsync))]
+    internal static class LoadPrefabAsyncPatch
+    {
+        private static void Prefix(ref Il2CppSystem.Action<UnityEngine.Transform>? onComplete)
+        {
+            onComplete = AssetReplace.WrapPrefabAsync(onComplete);
         }
     }
 }
