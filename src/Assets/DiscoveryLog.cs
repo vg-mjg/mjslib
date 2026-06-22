@@ -23,6 +23,8 @@ namespace Mjslib.AssetSwap
             _enabled = enabled;
             _path = path;
             _log = log;
+
+            if (_enabled) ResetForCurrentBoot();
         }
 
         public bool Enabled => _enabled;
@@ -98,6 +100,18 @@ namespace Mjslib.AssetSwap
             catch (Exception e)
             {
                 _log.LogWarning($"discovery.log append failed: {e.Message}");
+            }
+        }
+
+        private void ResetForCurrentBoot()
+        {
+            try
+            {
+                File.WriteAllText(_path, string.Empty);
+            }
+            catch (Exception e)
+            {
+                _log.LogWarning($"discovery.log reset failed: {e.Message}");
             }
         }
 
