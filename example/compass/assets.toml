@@ -1,0 +1,27 @@
+[[replace]]
+game_path = "scenes/mj/mjtable/texture/bg"
+file = "bg.png"
+
+[[replace]]
+game_path = "scenes/mj/mjtable/texture/score"
+file = "score.png"
+
+[[replace]]
+game_path = "scenes/mj/mjtable/texture/num_left"
+file = "num_left.png"
+
+[[replace]]
+game_path = "scenes/mj/mjtable/texture/left"
+file = "left.png"
+
+[[replace]]
+game_path = "scenes/mj/mjtable/texture/ju"
+file = "ju.png"
+
+[[replace]]
+game_path = "scenes/mj/mjtable/texture/feng_en"
+file = "feng_en.png"
+
+[[replace]]
+game_path = "scenes/mj/mjtable/texture/chang"
+file = "chang.png"
