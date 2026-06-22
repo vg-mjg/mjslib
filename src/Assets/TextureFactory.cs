@@ -7,6 +7,21 @@ using UnityEngine;
 
 namespace Mjslib.AssetSwap
 {
+    // import settings inherited from the original game texture
+    internal readonly struct TextureImportSettings
+    {
+        public TextureImportSettings(bool srgb, TextureWrapMode wrap, FilterMode filter)
+        {
+            Srgb = srgb;
+            Wrap = wrap;
+            Filter = filter;
+        }
+
+        public bool Srgb { get; }
+        public TextureWrapMode Wrap { get; }
+        public FilterMode Filter { get; }
+    }
+
     internal sealed class TextureFactory
     {
         private readonly Dictionary<string, Texture2D> _cache = new Dictionary<string, Texture2D>(StringComparer.Ordinal);
@@ -17,7 +32,7 @@ namespace Mjslib.AssetSwap
             _log = log;
         }
 
-        public Texture2D? GetOrBuild(string normalizedPath, ReplacementEntry entry)
+        public Texture2D? GetOrBuild(string normalizedPath, ReplacementEntry entry, TextureImportSettings? inherit = null)
         {
             if (_cache.TryGetValue(normalizedPath, out var cached))
             {
@@ -26,12 +41,16 @@ namespace Mjslib.AssetSwap
                 _cache.Remove(normalizedPath);
             }
 
+            var srgb = inherit?.Srgb ?? entry.Srgb;
+            var wrap = inherit?.Wrap ?? entry.Wrap;
+            var filter = inherit?.Filter ?? FilterMode.Bilinear;
+
             try
             {
                 var bytes = File.ReadAllBytes(entry.FilePath);
 
                 // unity uses linear=false for srgb textures
-                var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, linear: !entry.Srgb);
+                var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, linear: !srgb);
 
                 var data = (Il2CppStructArray<byte>)bytes;
                 if (!ImageConversion.LoadImage(tex, data, markNonReadable: false))
@@ -42,8 +61,8 @@ namespace Mjslib.AssetSwap
                     return null;
                 }
 
-                tex.filterMode = FilterMode.Bilinear;
-                tex.wrapMode = entry.Wrap;
+                tex.filterMode = filter;
+                tex.wrapMode = wrap;
                 // hide the texture from unity cleanup
                 tex.hideFlags = HideFlags.HideAndDontSave;
 

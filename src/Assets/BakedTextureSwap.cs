@@ -98,10 +98,32 @@ namespace Mjslib.AssetSwap
                 }
                 if (original == null) continue;
 
-                _seed[original.GetInstanceID()] = new SeedEntry(normalized, entry);
+                var inherit = InheritFrom(original, entry);
+                _seed[original.GetInstanceID()] = new SeedEntry(normalized, entry, inherit);
                 _log.LogInfo(
-                    $"[mjslib] baked seed: '{normalized}' <- container '{rawKey}' (instance {original.GetInstanceID()})");
+                    $"[mjslib] baked seed: '{normalized}' <- container '{rawKey}' (instance {original.GetInstanceID()}); " +
+                    $"inherited srgb={inherit.Srgb} wrap={inherit.Wrap} filter={inherit.Filter}");
             }
+        }
+
+        private static TextureImportSettings InheritFrom(Texture original, ReplacementEntry entry)
+        {
+            var wrap = entry.WrapExplicit ?? original.wrapMode;
+            var filter = original.filterMode;
+            var srgb = entry.SrgbExplicit ?? InferSrgb(original) ?? entry.Srgb;
+
+            return new TextureImportSettings(srgb, wrap, filter);
+        }
+
+        private static bool? InferSrgb(Texture original)
+        {
+            string format;
+            try { format = original.graphicsFormat.ToString(); }
+            catch { return null; }
+
+            if (format.IndexOf("SRGB", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            if (format.IndexOf("UNorm", StringComparison.OrdinalIgnoreCase) >= 0) return false;
+            return null;
         }
 
         private void WalkPrefab(Transform root)
@@ -139,7 +161,7 @@ namespace Mjslib.AssetSwap
                 if (tex == null) continue;
                 if (!_seed.TryGetValue(tex.GetInstanceID(), out var seed)) continue;
 
-                var replacement = _textures.GetOrBuild(seed.Normalized, seed.Entry);
+                var replacement = _textures.GetOrBuild(seed.Normalized, seed.Entry, seed.Inherit);
                 if (replacement == null || replacement.GetInstanceID() == tex.GetInstanceID()) continue;
 
                 mat.SetTexture(slot, replacement);
@@ -155,14 +177,16 @@ namespace Mjslib.AssetSwap
 
         private readonly struct SeedEntry
         {
-            public SeedEntry(string normalized, ReplacementEntry entry)
+            public SeedEntry(string normalized, ReplacementEntry entry, TextureImportSettings inherit)
             {
                 Normalized = normalized;
                 Entry = entry;
+                Inherit = inherit;
             }
 
             public string Normalized { get; }
             public ReplacementEntry Entry { get; }
+            public TextureImportSettings Inherit { get; }
         }
     }
 }
