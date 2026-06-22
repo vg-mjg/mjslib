@@ -31,5 +31,17 @@ namespace Mjslib.AssetSwap
 
             return s;
         }
+
+        public static bool HasTextureExtension(string? raw)
+        {
+            if (string.IsNullOrEmpty(raw)) return false;
+
+            foreach (var ext in KnownExtensions)
+            {
+                if (raw!.EndsWith(ext, StringComparison.OrdinalIgnoreCase)) return true;
+            }
+
+            return false;
+        }
     }
 }

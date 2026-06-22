@@ -64,7 +64,8 @@ namespace Mjslib
             AssetReplace.Sprites = new SpriteFactory(AssetReplace.Textures, Log);
             AssetReplace.Audio = new AudioFactory(decoder, Log);
             AssetReplace.Texts = new TextAssetFactory(Log);
-            AssetReplace.Baked = new BakedTextureSwap(AssetReplace.Registry, AssetReplace.Textures, Log);
+            AssetReplace.Baked = new BakedTextureSwap(
+                AssetReplace.Registry, AssetReplace.Textures, AssetReplace.Discovery!, Log);
 
             harmony.PatchAll(typeof(LoadTexturePatch));
             harmony.PatchAll(typeof(LoadTextureAsyncPatch));
@@ -187,7 +188,7 @@ namespace Mjslib
             AddLuaPackagePath(luaState, pluginRoot);
             log.LogInfo($"Added mod package path root: {pluginRoot}");
 
-            log.LogInfo($"Loading {mods.Count} consumer mod(s) in sorted path order");
+            log.LogInfo($"Loading {mods.Count} consumer mod(s)");
             foreach (var mod in mods)
             {
                 try

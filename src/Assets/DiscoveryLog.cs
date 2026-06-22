@@ -9,10 +9,13 @@ namespace Mjslib.AssetSwap
 {
     internal sealed class DiscoveryLog
     {
+        private const string TextureKind = "texture";
+
         private readonly bool _enabled;
         private readonly string _path;
         private readonly ManualLogSource _log;
         private readonly HashSet<string> _seen = new HashSet<string>(StringComparer.Ordinal);
+        private readonly Dictionary<string, string> _bakedLines = new Dictionary<string, string>(StringComparer.Ordinal);
         private readonly object _gate = new object();
 
         public DiscoveryLog(bool enabled, string path, ManualLogSource log)
@@ -39,26 +42,80 @@ namespace Mjslib.AssetSwap
             Record(loaderKind, rawPath, SpriteDimensions(sprite));
         }
 
+        public void RecordBakedTexture(string? normalizedPath)
+        {
+            if (!_enabled) return;
+            if (string.IsNullOrEmpty(normalizedPath)) return;
+
+            var path = PathNormalizer.Normalize(normalizedPath);
+            if (string.IsNullOrEmpty(path)) return;
+
+            var key = Key(TextureKind, path);
+            lock (_gate)
+            {
+                if (!_seen.Add(key)) return;
+
+                var line = CreateLine(TextureKind, path, null);
+                _bakedLines[key] = line;
+                AppendLine(line);
+            }
+        }
+
         private void Record(string loaderKind, string? rawPath, string? dimensions)
         {
             if (!_enabled) return;
             if (string.IsNullOrEmpty(rawPath)) return;
 
-            var key = loaderKind + "\0" + rawPath;
+            var dedupPath = loaderKind == TextureKind
+                ? PathNormalizer.Normalize(rawPath)
+                : rawPath!;
+            var key = Key(loaderKind, dedupPath);
             lock (_gate)
             {
-                if (!_seen.Add(key)) return;
+                var line = CreateLine(loaderKind, rawPath!, dimensions);
+                if (_seen.Add(key))
+                    AppendLine(line);
+                else if (loaderKind == TextureKind && _bakedLines.TryGetValue(key, out var bakedLine))
+                    ReplaceBakedLine(key, bakedLine, line);
+            }
+        }
 
-                try
-                {
-                    var size = string.IsNullOrEmpty(dimensions) ? "" : $"  {dimensions}";
-                    var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}  [{loaderKind}]{size}  {rawPath}{Environment.NewLine}";
-                    File.AppendAllText(_path, line);
-                }
-                catch (Exception e)
-                {
-                    _log.LogWarning($"discovery.log append failed: {e.Message}");
-                }
+        private static string Key(string loaderKind, string path) =>
+            loaderKind + "\0" + path;
+
+        private static string CreateLine(string loaderKind, string path, string? dimensions)
+        {
+            var size = string.IsNullOrEmpty(dimensions) ? "" : $"  {dimensions}";
+            return $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}  [{loaderKind}]{size}  {path}{Environment.NewLine}";
+        }
+
+        private void AppendLine(string line)
+        {
+            try
+            {
+                File.AppendAllText(_path, line);
+            }
+            catch (Exception e)
+            {
+                _log.LogWarning($"discovery.log append failed: {e.Message}");
+            }
+        }
+
+        private void ReplaceBakedLine(string key, string previous, string current)
+        {
+            try
+            {
+                var text = File.Exists(_path) ? File.ReadAllText(_path) : string.Empty;
+                var index = text.LastIndexOf(previous, StringComparison.Ordinal);
+                text = index >= 0
+                    ? text.Substring(0, index) + current + text.Substring(index + previous.Length)
+                    : text + current;
+                File.WriteAllText(_path, text);
+                _bakedLines.Remove(key);
+            }
+            catch (Exception e)
+            {
+                _log.LogWarning($"discovery.log rewrite failed: {e.Message}");
             }
         }
 

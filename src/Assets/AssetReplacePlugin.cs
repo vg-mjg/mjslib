@@ -133,7 +133,7 @@ namespace Mjslib.AssetSwap
             Il2CppSystem.Action<UnityEngine.Transform>? onComplete)
         {
             var baked = Baked;
-            if (baked == null || !baked.Active) return onComplete;
+            if (baked == null || !baked.ShouldScan) return onComplete;
 
             var original = onComplete;
             return DelegateSupport.ConvertDelegate<Il2CppSystem.Action<UnityEngine.Transform>>(

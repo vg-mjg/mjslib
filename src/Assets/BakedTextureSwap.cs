@@ -20,28 +20,31 @@ namespace Mjslib.AssetSwap
 
         private readonly ReplacementRegistry _registry;
         private readonly TextureFactory _textures;
+        private readonly DiscoveryLog _discovery;
         private readonly ManualLogSource _log;
 
         private readonly HashSet<int> _scannedBundles = new HashSet<int>();
         private readonly Dictionary<int, SeedEntry> _seed = new Dictionary<int, SeedEntry>();
 
-        public BakedTextureSwap(ReplacementRegistry registry, TextureFactory textures, ManualLogSource log)
+        public BakedTextureSwap(
+            ReplacementRegistry registry, TextureFactory textures, DiscoveryLog discovery, ManualLogSource log)
         {
             _registry = registry;
             _textures = textures;
+            _discovery = discovery;
             _log = log;
         }
 
-        public bool Active => _registry.Count > 0;
+        public bool ShouldScan => _registry.Count > 0 || _discovery.Enabled;
 
         public void OnPrefabLoaded(Transform? root)
         {
-            if (!Active || root == null) return;
+            if (root == null || !ShouldScan) return;
 
             try
             {
                 ScanBundles();
-                WalkPrefab(root);
+                if (_registry.Count > 0) WalkPrefab(root);
             }
             catch (Exception e)
             {
@@ -84,6 +87,11 @@ namespace Mjslib.AssetSwap
                 if (string.IsNullOrEmpty(rawKey)) continue;
 
                 var normalized = PathNormalizer.Normalize(rawKey);
+
+                // XXX: doesn't read dimensions just like the other probes
+                if (_discovery.Enabled && PathNormalizer.HasTextureExtension(rawKey))
+                    _discovery.RecordBakedTexture(normalized);
+
                 if (!_registry.TryGet(normalized, out var entry)) continue;
 
                 Texture? original;
@@ -101,7 +109,7 @@ namespace Mjslib.AssetSwap
                 var inherit = InheritFrom(original, entry);
                 _seed[original.GetInstanceID()] = new SeedEntry(normalized, entry, inherit);
                 _log.LogInfo(
-                    $"[mjslib] baked seed: '{normalized}' <- container '{rawKey}' (instance {original.GetInstanceID()}); " +
+                    $"[mjslib] baked seed: '{normalized}' from container '{rawKey}' (instance {original.GetInstanceID()}); " +
                     $"inherited srgb={inherit.Srgb} wrap={inherit.Wrap} filter={inherit.Filter}");
             }
         }
@@ -166,7 +174,7 @@ namespace Mjslib.AssetSwap
 
                 mat.SetTexture(slot, replacement);
                 _log.LogInfo(
-                    $"[mjslib] baked swap: material '{SafeName(mat)}' slot {slot} -> '{seed.Normalized}'");
+                    $"[mjslib] baked swap: material '{SafeName(mat)}' slot {slot} to '{seed.Normalized}'");
             }
         }
 
