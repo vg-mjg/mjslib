@@ -200,7 +200,7 @@ namespace Mjslib.AssetSwap
             _fallthrough.Add(rawPath);
             try
             {
-                AudioLoaderManager.LoadClip(rawPath, suffix, onCompleted);
+                LoadClipPatch.Original!(rawPath, suffix, onCompleted);
             }
             finally
             {

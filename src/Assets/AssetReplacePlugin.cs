@@ -221,10 +221,35 @@ namespace Mjslib.AssetSwap
         }
     }
 
-    [HarmonyPatch(typeof(AudioLoaderManager), nameof(AudioLoaderManager.LoadClip),
-        new[] { typeof(string), typeof(string), typeof(Il2CppSystem.Action<UnityEngine.AudioClip>) })]
+    [HarmonyPatch]
     internal static class LoadClipPatch
     {
+        internal static readonly MethodInfo? Target = ResolveTarget();
+
+        internal static readonly Action<string, string, Il2CppSystem.Action<UnityEngine.AudioClip>?>? Original =
+            Target?.CreateDelegate<Action<string, string, Il2CppSystem.Action<UnityEngine.AudioClip>?>>();
+
+        // plain reflection because Harmony logs a warning for whichever name is missing
+        private static MethodInfo? ResolveTarget()
+        {
+            var args = new[] { typeof(string), typeof(string), typeof(Il2CppSystem.Action<UnityEngine.AudioClip>) };
+            const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+            return typeof(AudioLoaderManager).GetMethod("LoadClipInternal", flags, null, args, null)
+                ?? typeof(AudioLoaderManager).GetMethod("LoadClip", flags, null, args, null);
+        }
+
+        private static bool Prepare()
+        {
+            if (Target != null) return true;
+
+            Plugin.Instance?.Log.LogWarning(
+                "Audio replacement disabled: no AudioLoaderManager.LoadClip/LoadClipInternal"
+                + "(string, string, Action<AudioClip>) in this game build");
+            return false;
+        }
+
+        private static MethodBase? TargetMethod() => Target;
+
         private static bool Prefix(string path, string suffix, Il2CppSystem.Action<UnityEngine.AudioClip> onCompleted)
         {
             if (AssetReplace.Audio?.ConsumeFallthrough(path) == true) return true;

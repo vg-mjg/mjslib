@@ -67,21 +67,34 @@ namespace Mjslib
             AssetReplace.Baked = new BakedTextureSwap(
                 AssetReplace.Registry, AssetReplace.Textures, AssetReplace.Discovery!, Log);
 
-            harmony.PatchAll(typeof(LoadTexturePatch));
-            harmony.PatchAll(typeof(LoadTextureAsyncPatch));
-            harmony.PatchAll(typeof(LoadSpritePatch));
-            harmony.PatchAll(typeof(LoadSpriteAsyncPatch));
-            harmony.PatchAll(typeof(LoadClipPatch));
-            harmony.PatchAll(typeof(LoadTextPatch));
-            harmony.PatchAll(typeof(LoadTextAsyncPatch));
-            harmony.PatchAll(typeof(LoadBytesPatch));
-            harmony.PatchAll(typeof(LoadBytesAsyncPatch));
-            harmony.PatchAll(typeof(LoadPrefabPatch));
-            harmony.PatchAll(typeof(LoadPrefabAsyncPatch));
-            Log.LogInfo(
-                "Patched ResLoadMgr.LoadTexture/LoadTextureAsync, LoadSprite/LoadSpriteAsync, "
-                + "LoadText/LoadTextAsync, LoadBytes/LoadBytesAsync, LoadPrefab/LoadPrefabAsync, "
-                + $"and AudioLoaderManager.LoadClip (audio decoder: {decoder})");
+            foreach (var patch in new[]
+            {
+                typeof(LoadTexturePatch), typeof(LoadTextureAsyncPatch),
+                typeof(LoadSpritePatch), typeof(LoadSpriteAsyncPatch),
+                typeof(LoadClipPatch),
+                typeof(LoadTextPatch), typeof(LoadTextAsyncPatch),
+                typeof(LoadBytesPatch), typeof(LoadBytesAsyncPatch),
+                typeof(LoadPrefabPatch), typeof(LoadPrefabAsyncPatch),
+            })
+            {
+                TryPatch(harmony, patch);
+            }
+
+            var patched = harmony.GetPatchedMethods().Select(m => $"{m.DeclaringType?.Name}.{m.Name}");
+            Log.LogInfo($"Patched {string.Join(", ", patched)} (audio decoder: {decoder})");
+        }
+
+        // game update renaming one target should only disable that feature
+        private void TryPatch(Harmony harmony, Type patch)
+        {
+            try
+            {
+                harmony.PatchAll(patch);
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"Failed to patch {patch.Name}: {e.InnerException?.Message ?? e.Message}");
+            }
         }
 
         private void StartLuaHook(Harmony harmony)
